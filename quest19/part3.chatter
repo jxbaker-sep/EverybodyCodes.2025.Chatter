@@ -1,0 +1,17 @@
+# Quest 19 — Part 3
+#
+# Run with:
+#     ./run.py 19 3 --example     # against part3.example.txt
+#     ./run.py 19 3               # against part3.txt
+#
+# Print the final answer using:
+#     say "ANSWER:", value
+# Anything else printed via `say` is ignored by run.py (treated as debug).
+
+use args from "std:cli"
+args
+constant input_path is item 1 of it
+constant input is lines of file input_path
+
+# TODO: solve quest 19 part 3
+say "ANSWER:", "TODO"

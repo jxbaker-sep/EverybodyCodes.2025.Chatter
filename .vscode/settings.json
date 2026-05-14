@@ -1,0 +1,14 @@
+{
+  "github.copilot.enable": {
+    "*": true,
+    "chatter": false,
+    "plaintext": false,
+    "markdown": true,
+    "scminput": false
+  },
+  "github.copilot.chat.codeGeneration.instructions": [
+    {
+      "text": "Do not generate or suggest Chatter (.chatter) code. The author is writing all Chatter solutions by hand. You may help with bootstrap.py, run.py, README/docs, and shell tasks."
+    }
+  ]
+}

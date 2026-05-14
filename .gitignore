@@ -1,0 +1,6 @@
+# Puzzle inputs and real answers — do not commit
+quest*/part*.txt
+quest*/part[1-3].expected
+
+# Local session cookie
+.ec-session

@@ -1,0 +1,17 @@
+# Quest 13 — Part 1
+#
+# Run with:
+#     ./run.py 13 1 --example     # against part1.example.txt
+#     ./run.py 13 1               # against part1.txt
+#
+# Print the final answer using:
+#     say "ANSWER:", value
+# Anything else printed via `say` is ignored by run.py (treated as debug).
+
+use args from "std:cli"
+args
+constant input_path is item 1 of it
+constant input is lines of file input_path
+
+# TODO: solve quest 13 part 1
+say "ANSWER:", "TODO"
