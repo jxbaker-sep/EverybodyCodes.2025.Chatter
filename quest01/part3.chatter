@@ -8,12 +8,10 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
-use args from "std:cli"
+use get_input from "../util/io"
 use wrap from "std:list"
 use parse, split from "std:strings"
-args
-constant input_path is item 1 of it
-constant input is lines of file input_path
+constant input is the result of get_input
 
 
 
@@ -41,11 +39,11 @@ end function
 constant names is the result of split item 1 of input on ","
 constant instructions is the result of line_to_instructions item 3 of input
 
-repeat with i in instructions
-    wrap 1 + i in length of names
-    constant j is it
-    constant temp is item j of names
-    change item j of names to item 1 of names
+map instructions using the result of wrap 1 + it in length of names
+
+repeat with i in it
+    constant temp is item i of names
+    change item i of names to item 1 of names
     change item 1 of names to temp
 end repeat
 

@@ -1,0 +1,18 @@
+# util/io.chatter — shared I/O helpers for Everybody Codes / Chatter puzzles.
+#
+# Each quest part receives its input file path on the command line (see
+# run.py and the README). This module wraps that boilerplate so quest
+# scripts can read their input in one line:
+#
+#     use get_input from "../util/io"
+#     constant input is the result of get_input
+
+use args from "std:cli"
+
+# get_input: read the puzzle input file path from argv[0] and return its
+# contents as a list of string, one entry per line. Blank lines preserved.
+export function get_input returns list of string is
+    args
+    constant input_path is item 1 of it
+    return lines of file input_path
+end function

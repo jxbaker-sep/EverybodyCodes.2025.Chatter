@@ -181,10 +181,8 @@ CHATTER_STUB = """# Quest {n} — Part {part}
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
-use args from "std:cli"
-args
-constant input_path is item 1 of it
-constant input is lines of file input_path
+use get_input from "../util/io"
+constant input is the result of get_input
 
 # TODO: solve quest {n} part {part}
 say "ANSWER:", "TODO"

@@ -8,11 +8,9 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
-use args from "std:cli"
+use get_input from "../util/io"
 use parse, split from "std:strings"
-args
-constant input_path is item 1 of it
-constant input is lines of file input_path
+constant input is the result of get_input
 
 type Instructions is list of number
 
