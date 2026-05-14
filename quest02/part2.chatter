@@ -8,8 +8,52 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+use ComplexNumber, add_complex, complex_to_string, divide_complex, multiply_complex, parse_complex from "./quest02_utils"
 use get_input from "../util/io"
 constant input is the result of get_input
 
-# TODO: solve quest 2 part 2
-say "ANSWER:", "TODO"
+map input using the result of parse_complex it
+constant a is item 1 of it
+constant ten is make ComplexNumber with X 10, Y 10
+constant one_thousand is make ComplexNumber with X 1_000, Y 1_000
+constant zero is make ComplexNumber with X 0, Y 0
+constant hundred_thousand is make ComplexNumber with X 100_000, Y 100_000
+
+function is_valid takes ComplexNumber n returns boolean is
+    if X of n is less than -1_000_000
+        return false
+    else if X of n is greater than 1_000_000
+        return false
+    else if Y of n is less than -1_000_000
+        return false
+    else if Y of n is greater than 1_000_000
+        return false 
+    else
+        return true
+    end if
+end function
+
+variable total is 0
+repeat with x from 0 to 100
+    repeat with y from 0 to 100
+        variable result is zero
+        variable valid is true
+        constant point is make ComplexNumber with X (X of a + x * 10), Y (Y of a + y * 10)
+        repeat 100 times
+            multiply_complex result by result
+            divide_complex it by hundred_thousand
+            add_complex point to it
+            change result to it
+            is_valid it
+            change valid to valid and it
+            if not valid
+                exit repeat
+            end if
+        end repeat
+        if valid
+            add 1 to total
+        end if
+    end repeat
+end repeat 
+
+say "ANSWER:", total
