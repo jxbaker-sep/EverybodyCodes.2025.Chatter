@@ -301,7 +301,7 @@ def ensure_gitignore() -> None:
     gi = REPO_ROOT / ".gitignore"
     required = [
         "# Puzzle inputs and real answers — do not commit",
-        "quest*/part*.txt",
+        "quest*/part[1-3].txt",
         "quest*/part[1-3].expected",
         "",
         "# Local session cookie",
