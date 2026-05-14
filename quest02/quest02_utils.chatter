@@ -1,0 +1,59 @@
+use parse, split from "std:string"
+use integers from "std:parser"
+
+export struct ComplexNumber
+    number X
+    number Y
+end struct
+
+export struct NamedComplexNumber
+    string Name
+    ComplexNumber Complex
+end struct
+
+export function complex_to_string takes ComplexNumber complex returns string is
+    return "[" & X of complex & "," & Y of complex & "]"
+end function
+
+export function parse_named_complex takes string s returns NamedComplexNumber is
+    split s on "="
+    constant name is item 1 of it
+    parse_complex item 2 of it
+    return make NamedComplexNumber with Name name, Complex it
+end function
+
+export function parse_complex takes string s returns ComplexNumber is
+    integers s
+    return make ComplexNumber with X (item 1 of it), Y (item 2 of it)
+end function
+
+export function add_complex takes
+    ComplexNumber lhs
+    to ComplexNumber rhs
+    returns ComplexNumber
+is
+    constant x is X of lhs + X of rhs
+    constant y is Y of lhs + Y of rhs
+    return make ComplexNumber with X x, Y y
+end function
+
+export function multiply_complex takes
+    ComplexNumber lhs
+    by ComplexNumber rhs
+    returns ComplexNumber
+is
+    constant x is X of lhs * X of rhs - Y of lhs * Y of rhs
+    constant y is X of lhs * Y of rhs + Y of lhs * X of rhs
+    return make ComplexNumber with X x, Y y
+end function
+
+
+export function divide_complex takes
+    ComplexNumber lhs
+    by ComplexNumber rhs
+    returns ComplexNumber
+is
+    constant x is X of lhs / X of rhs
+    constant y is Y of lhs / Y of rhs
+    return make ComplexNumber with X x, Y y
+end function

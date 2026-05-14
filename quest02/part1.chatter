@@ -8,8 +8,19 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+use ComplexNumber, add_complex, complex_to_string, divide_complex, multiply_complex, parse_complex from "./quest02_utils"
 use get_input from "../util/io"
 constant input is the result of get_input
+map input using the result of parse_complex it
+constant a is item 1 of it
+constant ten is make ComplexNumber with X 10, Y 10
+variable current is make ComplexNumber with X 0, Y 0
+repeat 3 times
+    multiply_complex current by current
+    divide_complex it by ten
+    add_complex a to it
+    change current to it
+end repeat 
 
-# TODO: solve quest 2 part 1
-say "ANSWER:", "TODO"
+complex_to_string current
+say "ANSWER:", it
