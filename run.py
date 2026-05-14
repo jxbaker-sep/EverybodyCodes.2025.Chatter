@@ -80,6 +80,26 @@ def normalize(s: str) -> str:
     return s.strip()
 
 
+def copy_to_clipboard(text: str) -> str | None:
+    """Best-effort copy to system clipboard. Returns tool name on success."""
+    candidates: list[tuple[str, list[str]]] = []
+    if sys.platform == "darwin":
+        candidates.append(("pbcopy", ["pbcopy"]))
+    elif sys.platform.startswith("linux"):
+        candidates.append(("wl-copy", ["wl-copy"]))
+        candidates.append(("xclip", ["xclip", "-selection", "clipboard"]))
+        candidates.append(("xsel", ["xsel", "--clipboard", "--input"]))
+    elif sys.platform.startswith("win"):
+        candidates.append(("clip", ["clip"]))
+    for name, cmd in candidates:
+        try:
+            subprocess.run(cmd, input=text.encode("utf-8"), check=True)
+            return name
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            continue
+    return None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Run and verify a quest part.")
     ap.add_argument("quest", type=int, help="Quest number (1-20)")
@@ -151,6 +171,11 @@ def main() -> int:
 
     if not expected_path.is_file():
         print(f"\n? no expected file at {expected_path.relative_to(REPO_ROOT) if expected_path.is_relative_to(REPO_ROOT) else expected_path}")
+        tool = copy_to_clipboard(answer)
+        if tool:
+            print(f"  📋 answer copied to clipboard via {tool} — paste into everybody.codes")
+        else:
+            print(f"  (clipboard tool not found; answer above)")
         print(f"  to record this answer:")
         print(f"    echo '{answer}' > {expected_path}")
         return 0
