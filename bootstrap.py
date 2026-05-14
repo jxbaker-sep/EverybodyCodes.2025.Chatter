@@ -127,6 +127,29 @@ _PRE_NOTE_RE = re.compile(
 )
 
 
+_PRE_BOLD_RE = re.compile(
+    r"<pre[^>]*>\s*<b[^>]*>\s*([^<]+?)\s*</b>\s*</pre>", re.IGNORECASE
+)
+
+
+def extract_example_answer(description_html: str) -> str | None:
+    """Pull the expected example answer out of a decrypted description HTML blob.
+
+    EC consistently highlights the example's final result inside the first
+    `<div class="example">` block as `<pre><b>ANSWER</b></pre>`. We take the
+    LAST such match within that block (the example may contain several -
+    intermediate results are highlighted the same way).
+    """
+    m = _FIRST_EXAMPLE_BLOCK_RE.search(description_html)
+    if not m:
+        return None
+    block = m.group(1)
+    matches = _PRE_BOLD_RE.findall(block)
+    if not matches:
+        return None
+    return html.unescape(matches[-1]).strip()
+
+
 def extract_example(description_html: str) -> str | None:
     """Pull the example input out of a decrypted description HTML blob.
 
@@ -235,25 +258,43 @@ def download_inputs(
             out.write_text(plaintext, encoding="utf-8")
             print(f"  fetched {out.relative_to(REPO_ROOT)} ({len(plaintext)} bytes)")
 
-        # Example input (parsed from the puzzle description)
+        # Example input + expected answer (both parsed from puzzle description)
         ex_out = qdir / f"part{p}.example.txt"
+        exp_out = qdir / f"part{p}.example.expected"
         desc_hex = descriptions.get(p)
         if not desc_hex:
             continue
-        if ex_out.exists() and not force:
+        ex_needed = not ex_out.exists() or force
+        exp_needed = not exp_out.exists() or force
+        if not ex_needed and not exp_needed:
             print(f"  keep    {ex_out.relative_to(REPO_ROOT)}")
+            print(f"  keep    {exp_out.relative_to(REPO_ROOT)}")
             continue
         try:
             desc_html = aes_decrypt_hex(key, desc_hex)
         except RuntimeError as e:
             print(f"  warn    could not decrypt description part {p}: {e}")
             continue
-        example = extract_example(desc_html)
-        if example is None:
-            print(f"  skip    part{p}.example.txt (no example found in description)")
-            continue
-        ex_out.write_text(example, encoding="utf-8")
-        print(f"  fetched {ex_out.relative_to(REPO_ROOT)} ({len(example)} bytes)")
+
+        if ex_needed:
+            example = extract_example(desc_html)
+            if example is None:
+                print(f"  skip    part{p}.example.txt (no example found in description)")
+            else:
+                ex_out.write_text(example, encoding="utf-8")
+                print(f"  fetched {ex_out.relative_to(REPO_ROOT)} ({len(example)} bytes)")
+        else:
+            print(f"  keep    {ex_out.relative_to(REPO_ROOT)}")
+
+        if exp_needed:
+            answer = extract_example_answer(desc_html)
+            if answer is None:
+                print(f"  skip    part{p}.example.expected (no answer found in description)")
+            else:
+                exp_out.write_text(answer.rstrip("\n") + "\n", encoding="utf-8")
+                print(f"  fetched {exp_out.relative_to(REPO_ROOT)} ({len(answer)} bytes)")
+        else:
+            print(f"  keep    {exp_out.relative_to(REPO_ROOT)}")
 
 
 def ensure_gitignore() -> None:
