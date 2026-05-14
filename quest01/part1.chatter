@@ -37,8 +37,6 @@ end function
 
 constant names is the result of split item 1 of input on ","
 constant instructions is the result of line_to_instructions item 3 of input
-say names
-say instructions
 
 variable current is 1
 function pin takes
@@ -61,5 +59,4 @@ repeat with i in instructions
     change current to it
 end repeat
 
-# TODO: solve quest 1 part 1
 say "ANSWER:", item current of names

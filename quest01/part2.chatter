@@ -9,9 +9,41 @@
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
 use args from "std:cli"
+use wrap from "std:list"
+use parse, split from "std:strings"
 args
 constant input_path is item 1 of it
 constant input is lines of file input_path
 
-# TODO: solve quest 1 part 2
-say "ANSWER:", "TODO"
+type Instructions is list of number
+
+function item_to_instruction takes string s returns number is
+    constant direction is character 1 of s
+    parse characters 2 to end of s
+    if direction is "L"
+        return -1 * it
+    else
+        return it
+    end if
+end function
+
+function line_to_instructions takes 
+    string line 
+    returns Instructions
+is
+    split line on ","
+    map it using the result of item_to_instruction it
+    return it
+end function
+
+constant names is the result of split item 1 of input on ","
+constant instructions is the result of line_to_instructions item 3 of input
+
+variable current is 1
+
+repeat with i in instructions
+    wrap current + i in length of names
+    change current to it
+end repeat
+
+say "ANSWER:", item current of names
