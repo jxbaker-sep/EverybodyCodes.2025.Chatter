@@ -27,10 +27,16 @@ gitignored — never commit either.
 ## Running & verifying a solution
 
 ```bash
-./run.py <quest> <part> --example   # run on part<N>.example.txt
-./run.py <quest> <part>             # run on the real input
+./run.py <quest> <part> --example     # run on part<N>.example.txt
+./run.py <quest> <part> --example 2   # run on part<N>.example.2.txt
+./run.py <quest> <part>               # run on the real input
 ./run.py <quest> <part> --no-verify
 ```
+
+Some quests ship multiple worked examples in their description; bootstrap
+saves them as `part<N>.example.1.txt`, `part<N>.example.2.txt`, …, each
+with a matching `.expected` file. Single-example quests stay on the
+unsuffixed `part<N>.example.txt` / `.expected`.
 
 The Chatter script reads its input path from `argv[0]`:
 

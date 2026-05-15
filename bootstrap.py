@@ -132,6 +132,13 @@ _PRE_BOLD_RE = re.compile(
 )
 
 
+def _clean_note_body(body: str) -> str:
+    text = html.unescape(body)
+    text = re.sub(r"<[^>]+>", "", text)
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    return text.strip("\n") + "\n"
+
+
 def extract_example_answer(description_html: str) -> str | None:
     """Pull the expected example answer out of a decrypted description HTML blob.
 
@@ -163,10 +170,34 @@ def extract_example(description_html: str) -> str | None:
     pm = _PRE_NOTE_RE.search(block)
     if not pm:
         return None
-    text = html.unescape(pm.group(1))
-    text = re.sub(r"<[^>]+>", "", text)
-    text = text.replace("\r\n", "\n").replace("\r", "\n")
-    return text.strip("\n") + "\n"
+    return _clean_note_body(pm.group(1))
+
+
+def extract_examples(description_html: str) -> list[tuple[str, str | None]]:
+    """Pull all (input, expected_answer) pairs from the first example block.
+
+    Some quests bundle multiple worked examples inside the same
+    `<div class="example">`. Each `<pre class="note">` is an example input,
+    and the LAST `<pre><b>X</b></pre>` strictly between that note and the
+    next note (or end-of-block) is the corresponding expected answer.
+    Returns a list with one entry per example (in document order).
+    """
+    m = _FIRST_EXAMPLE_BLOCK_RE.search(description_html)
+    if not m:
+        return []
+    block = m.group(1)
+    notes = list(_PRE_NOTE_RE.finditer(block))
+    if not notes:
+        return []
+    results: list[tuple[str, str | None]] = []
+    for i, note in enumerate(notes):
+        start = note.end()
+        end = notes[i + 1].start() if i + 1 < len(notes) else len(block)
+        bold = _PRE_BOLD_RE.findall(block, start, end)
+        answer = html.unescape(bold[-1]).strip() if bold else None
+        results.append((_clean_note_body(note.group(1)), answer))
+    return results
+
 
 
 def aes_decrypt_hex(key: str, hex_cipher: str) -> str:
@@ -258,17 +289,11 @@ def download_inputs(
             out.write_text(plaintext, encoding="utf-8")
             print(f"  fetched {out.relative_to(REPO_ROOT)} ({len(plaintext)} bytes)")
 
-        # Example input + expected answer (both parsed from puzzle description)
+        # Example input(s) + expected answer(s) (both parsed from puzzle description)
         ex_out = qdir / f"part{p}.example.txt"
         exp_out = qdir / f"part{p}.example.expected"
         desc_hex = descriptions.get(p)
         if not desc_hex:
-            continue
-        ex_needed = not ex_out.exists() or force
-        exp_needed = not exp_out.exists() or force
-        if not ex_needed and not exp_needed:
-            print(f"  keep    {ex_out.relative_to(REPO_ROOT)}")
-            print(f"  keep    {exp_out.relative_to(REPO_ROOT)}")
             continue
         try:
             desc_html = aes_decrypt_hex(key, desc_hex)
@@ -276,25 +301,39 @@ def download_inputs(
             print(f"  warn    could not decrypt description part {p}: {e}")
             continue
 
-        if ex_needed:
-            example = extract_example(desc_html)
-            if example is None:
-                print(f"  skip    part{p}.example.txt (no example found in description)")
-            else:
-                ex_out.write_text(example, encoding="utf-8")
-                print(f"  fetched {ex_out.relative_to(REPO_ROOT)} ({len(example)} bytes)")
-        else:
-            print(f"  keep    {ex_out.relative_to(REPO_ROOT)}")
+        examples = extract_examples(desc_html)
+        if not examples:
+            print(f"  skip    part{p}.example.* (no example found in description)")
+            continue
 
-        if exp_needed:
-            answer = extract_example_answer(desc_html)
-            if answer is None:
-                print(f"  skip    part{p}.example.expected (no answer found in description)")
-            else:
-                exp_out.write_text(answer.rstrip("\n") + "\n", encoding="utf-8")
-                print(f"  fetched {exp_out.relative_to(REPO_ROOT)} ({len(answer)} bytes)")
+        if len(examples) == 1:
+            targets = [(ex_out, exp_out, examples[0])]
         else:
-            print(f"  keep    {exp_out.relative_to(REPO_ROOT)}")
+            targets = []
+            for i, ex in enumerate(examples, start=1):
+                targets.append((
+                    qdir / f"part{p}.example.{i}.txt",
+                    qdir / f"part{p}.example.{i}.expected",
+                    ex,
+                ))
+
+        for ex_path, exp_path, (example_text, answer_text) in targets:
+            ex_needed = not ex_path.exists() or force
+            if ex_needed:
+                ex_path.write_text(example_text, encoding="utf-8")
+                print(f"  fetched {ex_path.relative_to(REPO_ROOT)} ({len(example_text)} bytes)")
+            else:
+                print(f"  keep    {ex_path.relative_to(REPO_ROOT)}")
+
+            exp_needed = not exp_path.exists() or force
+            if not exp_needed:
+                print(f"  keep    {exp_path.relative_to(REPO_ROOT)}")
+                continue
+            if answer_text is None:
+                print(f"  skip    {exp_path.relative_to(REPO_ROOT)} (no answer found)")
+            else:
+                exp_path.write_text(answer_text.rstrip("\n") + "\n", encoding="utf-8")
+                print(f"  fetched {exp_path.relative_to(REPO_ROOT)} ({len(answer_text)} bytes)")
 
 
 def ensure_gitignore() -> None:

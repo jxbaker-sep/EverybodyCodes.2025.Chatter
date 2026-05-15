@@ -105,9 +105,12 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Run and verify a quest part.")
     ap.add_argument("quest", type=int, help="Quest number (1-20)")
     ap.add_argument("part", type=int, choices=(1, 2, 3), help="Part number")
-    ap.add_argument("--example", action="store_true",
-                    help="Use the example input (part<N>.example.txt) and "
-                         "the example's expected file.")
+    ap.add_argument("--example", nargs="?", const=0, default=None, type=int,
+                    metavar="N",
+                    help="Use the example input. Bare --example uses "
+                         "part<N>.example.txt; --example 1, --example 2, etc. "
+                         "use part<N>.example.<i>.txt for quests with multiple "
+                         "worked examples.")
     ap.add_argument("--expected", default=None,
                     help="Override path to the expected-output file.")
     ap.add_argument("--no-verify", action="store_true",
@@ -132,9 +135,13 @@ def main() -> int:
             print(f"   ({note})", file=sys.stderr)
         print(f"   pass --force-slow to run anyway.", file=sys.stderr)
         return 0
-    if args.example:
-        input_path = qdir / f"part{args.part}.example.txt"
-        expected_path = qdir / f"part{args.part}.example.expected"
+    if args.example is not None:
+        if args.example == 0:
+            input_path = qdir / f"part{args.part}.example.txt"
+            expected_path = qdir / f"part{args.part}.example.expected"
+        else:
+            input_path = qdir / f"part{args.part}.example.{args.example}.txt"
+            expected_path = qdir / f"part{args.part}.example.{args.example}.expected"
     else:
         input_path = qdir / f"part{args.part}.txt"
         expected_path = qdir / f"part{args.part}.expected"
