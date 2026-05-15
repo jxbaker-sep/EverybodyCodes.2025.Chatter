@@ -47,18 +47,12 @@ is
         return value of key in escape_velocities
     end if
     variable result is zero
-    constant cache is empty unique list of ComplexNumber
     constant point is make ComplexNumber with X (x + X of a), Y (y + Y of a)
     repeat with iteration from 1 to 100
         multiply_complex result by result
         divide_complex it by hundred_thousand
         add_complex point to it
         change result to it
-        if cache contains result
-            change value of key in escape_velocities to 0
-            return 0
-        end if
-        add result to cache
         is_valid it
         if not it
             change value of key in escape_velocities to iteration
@@ -117,10 +111,11 @@ is
     end if
 end function
 
-repeat with x from 0 to 49
+constant box_size is 40
+repeat with x from 0 to 1_000 / box_size - 1
     say x
-    repeat with y from 0 to 49
-        do_region x * 20 to x * 20 + 19 with y * 20 to y * 20 + 19
+    repeat with y from 0 to 1000 / box_size - 1
+        do_region x * box_size to (x+1) * box_size -1 with y * box_size to (y+1) * box_size -1
     end repeat
 end repeat
 
