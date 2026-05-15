@@ -8,8 +8,32 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+use sum, max from "std:math"
 use get_input from "../util/io"
+use integers from "std:parser"
 constant input is the result of get_input
+constant sizes is the result of integers item 1 of input
 
-# TODO: solve quest 3 part 3
-say "ANSWER:", "TODO"
+constant counts is empty list of number
+max sizes
+repeat it times
+    append 0 to counts
+end repeat
+
+repeat with i in sizes
+    add 1 to item i of counts
+end repeat
+
+sum counts
+variable total is 0
+repeat while it is greater than 0
+    add 1 to total
+    repeat with i from 0 to length of counts - 1
+        if item end - i of counts is greater than 0
+            subtract 1 from item end - i of counts
+        end if
+    end repeat
+    sum counts
+end repeat
+
+say "ANSWER:", total
