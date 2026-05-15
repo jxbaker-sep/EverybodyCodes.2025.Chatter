@@ -8,8 +8,11 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+use parse from "std:string"
 use get_input from "../util/io"
 constant input is the result of get_input
+map input using the result of parse it
 
-# TODO: solve quest 4 part 1
-say "ANSWER:", "TODO"
+constant result is 2025 * item 1 of it / item end of it
+
+say "ANSWER:", result
