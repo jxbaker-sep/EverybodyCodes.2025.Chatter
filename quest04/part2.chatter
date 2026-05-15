@@ -8,8 +8,15 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+use parse from "std:string"
 use get_input from "../util/io"
+constant min_times is 10_000_000_000_000
 constant input is the result of get_input
+map input using the result of parse it
 
-# TODO: solve quest 4 part 2
-say "ANSWER:", "TODO"
+variable x is item end of it * min_times / item 1 of it
+if (item end of it * min_times) mod item 1 of it is not 0
+    add 1 to x
+end if
+
+say "ANSWER:", x
