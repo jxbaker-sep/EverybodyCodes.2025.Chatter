@@ -1,4 +1,5 @@
 export struct Point
   number X
   number Y
+  format is "(" & X of it & "," & Y of it & ")"
 end struct

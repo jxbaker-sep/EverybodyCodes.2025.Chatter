@@ -8,8 +8,23 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+use sum from "std:math"
+use integers from "std:parser"
 use get_input from "../util/io"
 constant input is the result of get_input
+constant sizes is the result of integers item 1 of input
 
-# TODO: solve quest 3 part 2
-say "ANSWER:", "TODO"
+constant uniqued is empty unique list of number 
+repeat with i in sizes
+    add i to uniqued
+end repeat
+
+constant sortable is empty list of number 
+repeat with i in uniqued
+    append i to sortable
+end repeat
+
+sort sortable
+sum items 1 to 20 of it
+
+say "ANSWER:", it
