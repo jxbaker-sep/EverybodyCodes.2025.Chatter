@@ -8,8 +8,127 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+use ComplexNumber, add_complex, complex_to_string, divide_complex, multiply_complex, parse_complex from "./quest02_utils"
 use get_input from "../util/io"
+use Point from "../util/point"
 constant input is the result of get_input
 
-# TODO: solve quest 2 part 3
-say "ANSWER:", "TODO"
+map input using the result of parse_complex it
+constant a is item 1 of it
+constant ten is make ComplexNumber with X 10, Y 10
+constant one_thousand is make ComplexNumber with X 1_000, Y 1_000
+constant zero is make ComplexNumber with X 0, Y 0
+constant hundred_thousand is make ComplexNumber with X 100_000, Y 100_000
+
+function is_valid takes ComplexNumber n returns boolean is
+    if X of n is less than -1_000_000
+        return false
+    else if X of n is greater than 1_000_000
+        return false
+    else if Y of n is less than -1_000_000
+        return false
+    else if Y of n is greater than 1_000_000
+        return false 
+    else
+        return true
+    end if
+end function
+
+constant escape_velocities is empty dictionary from Point to number
+
+# returns the iteration number where it escapes, or 0 if it never escapes
+function escapes_after takes
+    number x
+    by number y
+    returns number
+is
+    constant key is make Point with X x, Y y
+    if escape_velocities contains key
+        return value of key in escape_velocities
+    end if
+    variable result is zero
+    constant cache is empty unique list of ComplexNumber
+    constant point is make ComplexNumber with X (x + X of a), Y (y + Y of a)
+    repeat with iteration from 1 to 100
+        multiply_complex result by result
+        divide_complex it by hundred_thousand
+        add_complex point to it
+        change result to it
+        if cache contains result
+            change value of key in escape_velocities to 0
+            return 0
+        end if
+        add result to cache
+        is_valid it
+        if not it
+            change value of key in escape_velocities to iteration
+            return iteration
+        end if
+    end repeat
+    change value of key in escape_velocities to 0
+    return 0
+end function
+
+function do_region takes
+    number x1
+    to number x2
+    with number y1
+    to number y2
+is
+    constant escape_velocity is empty unique list of number
+    repeat with x from x1 to x2
+        escapes_after x by y1
+        add it to escape_velocity
+        escapes_after x by y2
+        add it to escape_velocity
+    end repeat
+
+    repeat with y from y1 + 1 to y2 - 1
+        escapes_after x1 by y
+        add it to escape_velocity
+
+        escapes_after x2 by y
+        add it to escape_velocity
+    end repeat
+
+    if not escape_velocity contains 0 and the length of escape_velocity is 1
+        return
+    end if
+
+    constant temp is x2 - x1 + 1
+    if temp mod 2 is 0
+        constant x_1 is x1
+        constant x_2 is x1 + temp / 2 - 1
+        constant x_3 is x2
+        constant y_1 is y1
+        constant y_2 is y1 + temp / 2 - 1
+        constant y_3 is y2
+        do_region x_1 to x_2 with y_1 to y_2
+        do_region x_1 to x_2 with y_2 + 1 to y_3
+        do_region x_2 + 1 to x_3 with y_1 to y_2
+        do_region x_2 + 1 to x_3 with y_2 + 1 to y_3
+    else
+
+        repeat with x from x1 + 1 to x2 - 1
+            repeat with y from y1 + 1 to y2 -1
+                escapes_after x by y
+            end repeat
+        end repeat
+    end if
+end function
+
+repeat with x from 0 to 49
+    say x
+    repeat with y from 0 to 49
+        do_region x * 20 to x * 20 + 19 with y * 20 to y * 20 + 19
+    end repeat
+end repeat
+
+# TODO: the gap at the edges
+# say escape_velocities
+do_region 1_000 to 1_000 with 0 to 1_000
+do_region 0 to 1_000 with 1_000 to 1_000
+
+filter values of escape_velocities where it is 0
+
+say "ANSWER:", length of it
