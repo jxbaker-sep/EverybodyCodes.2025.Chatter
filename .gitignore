@@ -2,6 +2,9 @@
 quest*/part[1-3].txt
 quest*/part[1-3].expected
 
+# Bulk input/answer dumps (e.g. everybody_codes_e<year>_q<n>.zip extractions)
+quest*/all-inputs/
+
 # Local session cookie
 .ec-session
 
