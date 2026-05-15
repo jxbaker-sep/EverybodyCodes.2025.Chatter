@@ -31,6 +31,7 @@ import os
 import re
 import subprocess
 import sys
+import threading
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent
@@ -135,21 +136,40 @@ def main() -> int:
 
     cmd, cwd = chatter_command(script, input_path)
     print(f"$ {' '.join(cmd)}", file=sys.stderr)
-    proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
 
-    # Always surface chatter's own stderr (real errors / traces).
-    if proc.stderr:
-        sys.stderr.write(proc.stderr)
-        if not proc.stderr.endswith("\n"):
-            sys.stderr.write("\n")
+    # Stream stdout line-by-line so debug lines surface immediately on
+    # long-running solutions. Stderr is forwarded in a background thread.
+    proc = subprocess.Popen(
+        cmd, cwd=cwd,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        text=True, bufsize=1,
+    )
 
-    answer, debug = extract_answer(proc.stdout)
-    for line in debug:
-        print(f"  [debug] {line}", file=sys.stderr)
+    def _pump_stderr() -> None:
+        assert proc.stderr is not None
+        for line in proc.stderr:
+            sys.stderr.write(line)
+            sys.stderr.flush()
 
-    if proc.returncode != 0:
-        print(f"\n✗ chatter exited with code {proc.returncode}", file=sys.stderr)
-        return proc.returncode
+    stderr_thread = threading.Thread(target=_pump_stderr, daemon=True)
+    stderr_thread.start()
+
+    answer: str | None = None
+    assert proc.stdout is not None
+    for line in proc.stdout:
+        line = line.rstrip("\n")
+        m = ANSWER_RE.match(line)
+        if m and answer is None:
+            answer = m.group(1)
+        else:
+            print(f"  [debug] {line}", file=sys.stderr)
+            sys.stderr.flush()
+    returncode = proc.wait()
+    stderr_thread.join()
+
+    if returncode != 0:
+        print(f"\n✗ chatter exited with code {returncode}", file=sys.stderr)
+        return returncode
 
     if answer is None:
         print("\n✗ no `ANSWER: …` line found in stdout", file=sys.stderr)

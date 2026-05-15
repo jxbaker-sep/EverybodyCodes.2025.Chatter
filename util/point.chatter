@@ -1,0 +1,4 @@
+export struct Point
+  number X
+  number Y
+end struct
