@@ -53,6 +53,21 @@ Expected files live alongside inputs:
 If no expected file exists, `run.py` prints the answer plus the exact
 shell command to record it.
 
+### Slow parts (skip in regressions)
+
+If a `quest<NN>/part<N>.slow` file is present, `run.py` **skips** that
+part by default and prints the marker's contents as the reason. This is
+the mechanism for marking solutions that are correct but take minutes
+(or longer) to run, so they don't pollute casual reruns or regression
+sweeps.
+
+  - To run anyway: `./run.py <quest> <part> --force-slow`
+  - To mark a part slow: create the marker with a short note, e.g.
+    `echo "Mariani-Silver; ~3min on example" > quest02/part3.slow`
+  - **AI / assistant guidance:** never run a `.slow` part as part of
+    a regression, verification sweep, or "just check it still works"
+    flow. Only run it when the user explicitly asks for that part.
+
 `run.py` invokes the local Chatter checkout via
 `$CHATTER_HOME/node_modules/.bin/ts-node` (default
 `CHATTER_HOME=/Users/jxbaker/dev/chatter`). Set `CHATTER_CMD` to override.

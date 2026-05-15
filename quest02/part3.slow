@@ -1,0 +1,3 @@
+Mariani-Silver over a 1001x1001 grid; example takes ~3 minutes, real input
+takes substantially longer. Skip in regressions / casual reruns. Use
+./run.py 2 3 --force-slow to run anyway.

@@ -116,10 +116,22 @@ def main() -> int:
                     help="Write the answer to the expected file. "
                          "Errors if the expected file already exists; use "
                          "this only to record a freshly-confirmed answer.")
+    ap.add_argument("--force-slow", action="store_true",
+                    help="Run even if a part<N>.slow marker exists next to "
+                         "the solution. By default such parts are skipped.")
     args = ap.parse_args()
 
     qdir = REPO_ROOT / f"quest{args.quest:02d}"
     script = qdir / f"part{args.part}.chatter"
+    slow_marker = qdir / f"part{args.part}.slow"
+    if slow_marker.is_file() and not args.force_slow:
+        note = slow_marker.read_text(encoding="utf-8").strip()
+        print(f"⏭  skipping quest{args.quest:02d}/part{args.part}: marked SLOW",
+              file=sys.stderr)
+        if note:
+            print(f"   ({note})", file=sys.stderr)
+        print(f"   pass --force-slow to run anyway.", file=sys.stderr)
+        return 0
     if args.example:
         input_path = qdir / f"part{args.part}.example.txt"
         expected_path = qdir / f"part{args.part}.example.expected"
