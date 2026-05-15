@@ -24,16 +24,6 @@ repeat with i in sizes
     add 1 to item i of counts
 end repeat
 
-sum counts
-variable total is 0
-repeat while it is greater than 0
-    add 1 to total
-    repeat with i from 0 to length of counts - 1
-        if item end - i of counts is greater than 0
-            subtract 1 from item end - i of counts
-        end if
-    end repeat
-    sum counts
-end repeat
+max counts
 
-say "ANSWER:", total
+say "ANSWER:", it
