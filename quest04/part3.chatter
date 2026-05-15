@@ -8,8 +8,37 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+use bigint_from_number, bigint_add, bigint_multiply, bigint_divide from "std:bigint"
+use integers from "std:parser"
+use parse from "std:string"
 use get_input from "../util/io"
 constant input is the result of get_input
 
-# TODO: solve quest 4 part 3
-say "ANSWER:", "TODO"
+parse item 1 of input
+bigint_from_number it
+constant first is it  
+
+parse item end of input
+bigint_from_number it
+constant final is it  
+
+constant one_hundred is the result of bigint_from_number 100
+
+variable e is the result of bigint_from_number 1
+variable d is the result of bigint_from_number 1
+
+repeat with line in items 2 to end - 1 of input
+    integers line
+    map it using the result of bigint_from_number it
+    constant temp is it
+    change e to the result of bigint_multiply e by item 2 of temp
+    change d to the result of bigint_multiply d by item 1 of temp
+    
+end repeat
+
+bigint_multiply one_hundred by first
+bigint_multiply it by e
+bigint_divide it by d
+bigint_divide it by final
+
+say "ANSWER:", it
