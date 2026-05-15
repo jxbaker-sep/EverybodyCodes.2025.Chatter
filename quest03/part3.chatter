@@ -8,20 +8,21 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
-use sum, max from "std:math"
+use max from "std:math"
 use get_input from "../util/io"
 use integers from "std:parser"
 constant input is the result of get_input
 constant sizes is the result of integers item 1 of input
 
 constant counts is empty list of number
+# pre-allocate counts[1..maxSize]
 max sizes
 repeat it times
     append 0 to counts
 end repeat
 
-repeat with i in sizes
-    add 1 to item i of counts
+repeat with size in sizes
+    add 1 to item size of counts
 end repeat
 
 max counts
