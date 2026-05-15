@@ -8,7 +8,7 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
-use ComplexNumber, add_complex, complex_to_string, divide_complex, multiply_complex, parse_complex from "./quest02_utils"
+use ComplexNumber, add_complex, divide_complex, multiply_complex, parse_complex from "./quest02_utils"
 use get_input from "../util/io"
 constant input is the result of get_input
 

@@ -4,23 +4,8 @@ use integers from "std:parser"
 export struct ComplexNumber
     number X
     number Y
+    format is "[" & X of it & "," & Y of it & "]"
 end struct
-
-export struct NamedComplexNumber
-    string Name
-    ComplexNumber Complex
-end struct
-
-export function complex_to_string takes ComplexNumber complex returns string is
-    return "[" & X of complex & "," & Y of complex & "]"
-end function
-
-export function parse_named_complex takes string s returns NamedComplexNumber is
-    split s on "="
-    constant name is item 1 of it
-    parse_complex item 2 of it
-    return make NamedComplexNumber with Name name, Complex it
-end function
 
 export function parse_complex takes string s returns ComplexNumber is
     integers s
