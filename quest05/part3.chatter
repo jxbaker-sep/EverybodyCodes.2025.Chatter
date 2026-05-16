@@ -30,7 +30,14 @@ is
     parse it
     append it to output
     repeat with segment in segments
-        parse Left of segment & Center of segment & Right of segment
+        variable temp is "" & Center of segment
+        if Left of segment is not 0
+            change temp to Left of segment & temp
+        end if
+        if Right of segment is not 0
+            change temp to temp & Right of segment
+        end if
+        parse temp
         append it to output
     end repeat
     return output
@@ -44,10 +51,8 @@ is
     min list of length of Quality of sword1, length of Quality of sword2
     repeat with i from 1 to it
         constant x is item i of the Quality of sword1 - item i of the Quality of sword2
-        if x is less than 0
-            return -1
-        else if x is greater than 0
-            return 1
+        if x is not 0
+            return x
         end if
     end repeat
     return the Id of sword1 - the Id of sword2
@@ -59,8 +64,8 @@ is
     repeat with i from 1 to length of haystack - 1
         variable selected is i
         repeat with j from i + 1 to length of haystack
-            compare_swords item selected of haystack to item j of haystack
-            if it is -1
+            compare_swords item j of haystack to item selected of haystack
+            if it is greater than 0
                 change selected to j
             end if
         end repeat
@@ -87,6 +92,8 @@ repeat with line in input
     constant id is item 1 of it
     constant segments is empty list of Segment
     repeat with n in items 2 to end of ns
+        expect n to not be 0
+        expect n to be at most 9
         repeat with segment_index from 1 to length of segments + 1
             if segment_index is greater than the length of segments
                 make_segment n
@@ -108,12 +115,9 @@ repeat with line in input
 end repeat
 
 bubble_sort_swords swords
-say swords
 variable checksum is 0
 repeat with i from 1 to length of swords
     add i * Id of item i of swords to checksum
 end repeat
-
-# 31528966 - length is correct, first character is correct
 
 say "ANSWER:", checksum
