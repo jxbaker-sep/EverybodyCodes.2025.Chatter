@@ -47,5 +47,4 @@ say segments
 map segments using the Center of it
 reduce it starting "" using accumulator & it
 
-# TODO: solve quest 5 part 1
 say "ANSWER:", it

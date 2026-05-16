@@ -7,9 +7,51 @@
 # Print the final answer using:
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
-
+ 
+use parse from "std:string"
+use integers from "std:parser"
 use get_input from "../util/io"
 constant input is the result of get_input
 
-# TODO: solve quest 5 part 2
-say "ANSWER:", "TODO"
+struct Segment
+    number Left
+    number Center
+    number Right
+end struct
+
+function make_segment takes number n returns Segment is
+    return make Segment with Left 0, Center n, Right 0
+end function
+
+constant qualities is empty list of number
+
+repeat with line in input
+    integers line
+    constant ns is it
+    constant segments is empty list of Segment
+    repeat with n in items 2 to end of ns
+        repeat with segment_index from 1 to length of segments + 1
+            if segment_index is greater than the length of segments
+                make_segment n
+                append it to segments
+                exit repeat
+            end if
+            constant segment is item segment_index of segments
+            if n is less than the Center of segment and Left of segment is 0
+                change item segment_index of segments to segment with Left n
+                exit repeat
+            else if n is greater than the Center of segment and Right of segment is 0
+                change item segment_index of segments to segment with Right n
+                exit repeat
+            end if
+        end repeat
+    end repeat
+    map segments using the Center of it
+    reduce it starting "" using accumulator & it
+    parse it
+    append it to qualities
+end repeat
+
+sort qualities
+
+say "ANSWER:", item end of qualities - item 1 of qualities
