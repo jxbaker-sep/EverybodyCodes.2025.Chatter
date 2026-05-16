@@ -8,8 +8,78 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
-use get_input from "../util/io"
-constant input is the result of get_input
+use parse from "std:string"
+use args from "std:cli"
+use get_input, get_extra_input from "../util/io"
+get_input
+constant input_temp is item 1 of it
 
-# TODO: solve quest 6 part 3
-say "ANSWER:", "TODO"
+get_extra_input
+map it using the result of parse it
+constant repeats is item 1 of it
+constant max_distance is item 2 of it
+
+variable input is ""
+repeat repeats times
+    change input to input & input_temp
+end repeat 
+
+variable total is 0
+constant knights is list of 0, 0, 0
+
+function increment_knight takes string knight by number increment is 
+    if knight is "A"
+        add increment to item 1 of knights
+    else if knight is "B"
+        add increment to item 2 of knights
+    else if knight is "C"
+        add increment to item 3 of knights
+    else
+        expect false, "Unknown knight " & knight
+    end if
+end function
+
+function get_mentors takes string novice returns number is
+    if novice is "a"
+        return item 1 of knights
+    else if novice is "b"
+        return item 2 of knights
+    else if novice is "c"
+        return item 3 of knights
+    end if
+    expect false, "Unknown novice " & novice
+    return 0
+end function
+
+# prepopulate up to max_distance
+repeat with i from 1 to max_distance
+    constant c is character i of input
+    if list of "A", "B", "C" contains c
+        increment_knight c by 1
+    end if
+end repeat
+
+repeat with i from 1 to length of input
+    if i - max_distance - 1 is at least 1
+        constant old is character i - max_distance - 1 of input
+        if list of "A", "B", "C" contains old
+            increment_knight old by -1
+        end if
+    end if
+
+    if i + max_distance is at most length of input
+        constant new is character i + max_distance of input
+        if list of "A", "B", "C" contains new
+            increment_knight new by 1
+        end if
+    end if
+
+    constant c is character i of input
+    if list of "a", "b", "c" contains c
+        get_mentors c
+        add it to total
+    end if
+end repeat
+
+
+say "ANSWER:", total

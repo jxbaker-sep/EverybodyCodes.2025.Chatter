@@ -8,11 +8,21 @@
 #     constant input is the result of get_input
 
 use args from "std:cli"
+use split from "std:string"
 
 # get_input: read the puzzle input file path from argv[0] and return its
 # contents as a list of string, one entry per line. Blank lines preserved.
 export function get_input returns list of string is
     args
     constant input_path is item 1 of it
+    return lines of file input_path
+end function
+
+export function get_extra_input returns list of string is
+    args
+    constant parts is the result of split item 1 of it on "."
+    change item end of parts to "extras"
+    reduce items 2 to end of parts starting item 1 of parts using accumulator & "." & it
+    constant input_path is it & ".txt"
     return lines of file input_path
 end function
