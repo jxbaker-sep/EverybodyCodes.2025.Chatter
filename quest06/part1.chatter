@@ -9,7 +9,18 @@
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
 use get_input from "../util/io"
-constant input is the result of get_input
+get_input
+constant input is item 1 of it
 
-# TODO: solve quest 6 part 1
-say "ANSWER:", "TODO"
+variable total is 0
+variable knights is 0
+repeat with i from 1 to length of input
+    constant c is character i of input
+    if c is "A"
+        add 1 to knights
+    else if c is "a"
+        add knights to total
+    end if
+end repeat
+
+say "ANSWER:", total
