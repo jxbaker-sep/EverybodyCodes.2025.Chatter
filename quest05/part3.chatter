@@ -8,8 +8,112 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+use min from "std:math"
+use parse from "std:string"
+use integers from "std:parser"
 use get_input from "../util/io"
 constant input is the result of get_input
 
-# TODO: solve quest 5 part 3
-say "ANSWER:", "TODO"
+struct Segment
+    number Left
+    number Center
+    number Right
+end struct
+
+function segments_to_quality takes
+    list of Segment segments
+    returns list of number
+is
+    constant output is empty list of number
+    map segments using the Center of it
+    reduce it starting "" using accumulator & it
+    parse it
+    append it to output
+    repeat with segment in segments
+        parse Left of segment & Center of segment & Right of segment
+        append it to output
+    end repeat
+    return output
+end function
+
+function compare_swords takes
+    Sword sword1
+    to Sword sword2
+    returns number
+is
+    min list of length of Quality of sword1, length of Quality of sword2
+    repeat with i from 1 to it
+        constant x is item i of the Quality of sword1 - item i of the Quality of sword2
+        if x is less than 0
+            return -1
+        else if x is greater than 0
+            return 1
+        end if
+    end repeat
+    return the Id of sword1 - the Id of sword2
+end function
+
+function bubble_sort_swords takes
+    list of Sword haystack
+is
+    repeat with i from 1 to length of haystack - 1
+        variable selected is i
+        repeat with j from i + 1 to length of haystack
+            compare_swords item selected of haystack to item j of haystack
+            if it is -1
+                change selected to j
+            end if
+        end repeat
+        constant temp is item i of haystack
+        change item i of haystack to item selected of haystack
+        change item selected of haystack to temp
+    end repeat
+end function
+
+struct Sword 
+    number Id
+    list of number Quality
+end struct
+
+function make_segment takes number n returns Segment is
+    return make Segment with Left 0, Center n, Right 0
+end function
+
+constant swords is empty list of Sword
+
+repeat with line in input
+    integers line
+    constant ns is it
+    constant id is item 1 of it
+    constant segments is empty list of Segment
+    repeat with n in items 2 to end of ns
+        repeat with segment_index from 1 to length of segments + 1
+            if segment_index is greater than the length of segments
+                make_segment n
+                append it to segments
+                exit repeat
+            end if
+            constant segment is item segment_index of segments
+            if n is less than the Center of segment and Left of segment is 0
+                change item segment_index of segments to segment with Left n
+                exit repeat
+            else if n is greater than the Center of segment and Right of segment is 0
+                change item segment_index of segments to segment with Right n
+                exit repeat
+            end if
+        end repeat
+    end repeat
+    segments_to_quality segments
+    append make Sword with Id id, Quality it to swords
+end repeat
+
+bubble_sort_swords swords
+say swords
+variable checksum is 0
+repeat with i from 1 to length of swords
+    add i * Id of item i of swords to checksum
+end repeat
+
+# 31528966 - length is correct, first character is correct
+
+say "ANSWER:", checksum
