@@ -8,8 +8,44 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+use integers from "std:parser"
 use get_input from "../util/io"
 constant input is the result of get_input
 
+struct Segment
+    number Left
+    number Center
+    number Right
+end struct
+
+function make_segment takes number n returns Segment is
+    return make Segment with Left 0, Center n, Right 0
+end function
+
+integers item 1 of input
+constant ns is it
+constant segments is empty list of Segment
+repeat with n in items 2 to end of ns
+    repeat with segment_index from 1 to length of segments + 1
+        if segment_index is greater than the length of segments
+            make_segment n
+            append it to segments
+            exit repeat
+        end if
+        constant segment is item segment_index of segments
+        if n is less than the Center of segment and Left of segment is 0
+            change item segment_index of segments to segment with Left n
+            exit repeat
+        else if n is greater than the Center of segment and Right of segment is 0
+            change item segment_index of segments to segment with Right n
+            exit repeat
+        end if
+    end repeat
+end repeat
+
+say segments
+map segments using the Center of it
+reduce it starting "" using accumulator & it
+
 # TODO: solve quest 5 part 1
-say "ANSWER:", "TODO"
+say "ANSWER:", it
