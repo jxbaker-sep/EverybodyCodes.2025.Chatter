@@ -9,7 +9,20 @@
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
 use get_input from "../util/io"
-constant input is the result of get_input
+get_input
+constant input is item 1 of it
 
-# TODO: solve quest 6 part 2
-say "ANSWER:", "TODO"
+variable total is 0
+variable knights is list of 0, 0, 0
+constant A is code of "A"
+constant a is code of "a"
+repeat with i from 1 to length of input
+    constant c is character i of input
+    if list of "A", "B", "C" contains c
+        add 1 to item (code of c - A + 1) of knights
+    else
+        add item (code of c - a + 1) of knights to total
+    end if
+end repeat
+
+say "ANSWER:", total
