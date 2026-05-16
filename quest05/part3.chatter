@@ -26,19 +26,16 @@ function segments_to_quality takes
 is
     constant output is empty list of number
     map segments using the Center of it
-    reduce it starting "" using accumulator & it
-    parse it
+    reduce it starting 0 using accumulator * 10 + it
     append it to output
     repeat with segment in segments
-        variable temp is "" & Center of segment
-        if Left of segment is not 0
-            change temp to Left of segment & temp
-        end if
+        variable temp is 10 * Left of segment
+        add Center of segment to temp
         if Right of segment is not 0
-            change temp to temp & Right of segment
+            multiply temp by 10
+            add Right of segment to temp
         end if
-        parse temp
-        append it to output
+        append temp to output
     end repeat
     return output
 end function
@@ -58,7 +55,7 @@ is
     return the Id of sword1 - the Id of sword2
 end function
 
-function bubble_sort_swords takes
+function selection_sort_swords takes
     list of Sword haystack
 is
     repeat with i from 1 to length of haystack - 1
@@ -114,7 +111,7 @@ repeat with line in input
     append make Sword with Id id, Quality it to swords
 end repeat
 
-bubble_sort_swords swords
+selection_sort_swords swords
 variable checksum is 0
 repeat with i from 1 to length of swords
     add i * Id of item i of swords to checksum
