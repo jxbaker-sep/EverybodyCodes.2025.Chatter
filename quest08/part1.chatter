@@ -8,8 +8,24 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+use max from "std:math"
+use wrap from "std:list"
+use integers from "std:parser"
 use get_input from "../util/io"
 constant input is the result of get_input
 
-# TODO: solve quest 8 part 1
-say "ANSWER:", "TODO"
+integers item 1 of input
+constant ns is it
+max ns
+constant nails is it
+variable total is 0
+repeat with i from 1 to length of ns - 1
+    constant n1 is item i of ns
+    constant n2 is item i + 1 of ns
+    wrap n1 + nails / 2 in nails
+    if it is n2
+        add 1 to total
+    end if
+end repeat
+
+say "ANSWER:", total
