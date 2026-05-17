@@ -46,5 +46,4 @@ end function
 
 filter names where the result of is_legal it
 
-# TODO: solve quest 7 part 1
 say "ANSWER:", item 1 of it

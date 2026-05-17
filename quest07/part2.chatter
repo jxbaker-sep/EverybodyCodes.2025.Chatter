@@ -8,8 +8,50 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+
+use split, trim from "std:string"
 use get_input from "../util/io"
 constant input is the result of get_input
 
-# TODO: solve quest 7 part 2
-say "ANSWER:", "TODO"
+struct StringSet
+    unique list of string Set
+end struct
+
+constant names is the result of split item 1 of input on ","
+constant rules is empty dictionary from string to StringSet
+repeat with line in items 3 to end of input
+    split line on ">"
+    constant parts is it
+    trim item 1 of parts
+    constant head is it
+    trim item 2 of parts
+    split it on ","
+    constant s is empty unique list of string
+    repeat with temp in it
+        add temp to s
+    end repeat
+    constant stringset is make StringSet with Set s
+    change value of head in rules to stringset
+end repeat
+
+function is_legal takes string name returns boolean is
+    repeat with i from 1 to length of name - 1
+        constant head is character i of name
+        constant tail is character i + 1 of name
+        if not the Set of value of head in rules contains tail
+            return false
+        end if
+    end repeat
+    return true
+end function 
+
+variable total is 0
+repeat with i from 1 to length of names
+    is_legal item i of names
+    if it
+        add i to total
+    end if
+end repeat
+
+say "ANSWER:", total
+
