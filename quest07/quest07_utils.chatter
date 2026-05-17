@@ -1,0 +1,42 @@
+use split, trim from "std:string"
+
+export struct StringSet
+    unique list of string Set
+end struct
+
+export function populate_rules takes
+    list of string input_lines
+    returns dictionary from string to StringSet
+is
+    constant result is empty dictionary from string to StringSet
+    repeat with line in items 3 to end of input_lines
+        split line on ">"
+        constant parts is it
+        trim item 1 of parts
+        constant head is it
+        trim item 2 of parts
+        split it on ","
+        constant s is empty unique list of string
+        repeat with temp in it
+            add temp to s
+        end repeat
+        constant stringset is make StringSet with Set s
+        change value of head in result to stringset
+    end repeat
+    return result
+end function
+
+export function is_legal takes
+    string name
+    with dictionary from string to StringSet rule_dict
+    returns boolean
+is
+    repeat with i from 1 to length of name - 1
+        constant head is character i of name
+        constant tail is character i + 1 of name
+        if not the Set of value of head in rule_dict contains tail
+            return false
+        end if
+    end repeat
+    return true
+end function
