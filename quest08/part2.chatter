@@ -8,8 +8,64 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+
+use max, sign from "std:math"
+use wrap from "std:list"
+use integers from "std:parser"
 use get_input from "../util/io"
 constant input is the result of get_input
 
-# TODO: solve quest 8 part 2
-say "ANSWER:", "TODO"
+function crosses takes
+    number n1
+    to number n2
+    with number x1
+    to number x2
+    returns boolean
+is
+    sort list of n1, n2
+    variable a1 is item 1 of it
+    variable a2 is item 2 of it
+    sort list of x1, x2
+    variable b1 is item 1 of it
+    variable b2 is item 2 of it
+
+    if a1 is b1 or a2 is b1 or a1 is b2 or a2 is b2
+        return false
+    end if
+
+    if a1 is greater than b1
+        constant t1 is a1
+        constant t2 is a2
+        change a1 to b1
+        change a2 to b2
+        change b1 to t1
+        change b2 to t2
+    end if
+
+    constant s1 is the result of sign a1 - b1
+    constant s2 is the result of sign a1 - b2
+    constant s3 is the result of sign a2 - b1
+    constant s4 is the result of sign a2 - b2
+    return s1 is not s2 or s3 is not s4
+end function
+
+integers item 1 of input
+constant ns is it
+max ns
+variable total is 0
+repeat with i from 1 to length of ns - 1
+    constant n1 is item i of ns
+    constant n2 is item i + 1 of ns
+    if i is at least 2
+        repeat with j from 1 to i - 1
+            constant x1 is item j of ns
+            constant x2 is item j + 1 of ns
+            crosses n1 to n2 with x1 to x2
+            if it
+                add 1 to total
+            end if
+        end repeat
+    end if
+end repeat
+
+say "ANSWER:", total
