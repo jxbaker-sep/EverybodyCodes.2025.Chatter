@@ -8,8 +8,67 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+use split, trim, starts_with from "std:string"
 use get_input from "../util/io"
+use StringSet, populate_rules, is_legal from "./quest07_utils"
 constant input is the result of get_input
 
-# TODO: solve quest 7 part 3
-say "ANSWER:", "TODO"
+constant rules is the result of populate_rules input
+
+struct CacheKey
+    string Head
+    number Index
+end struct
+
+constant cache is empty dictionary from CacheKey to number
+# head is the index character
+function count_names takes 
+    string head 
+    from number index 
+    returns number 
+is
+    if index is 11
+        return 1
+    end if
+
+    constant key is make CacheKey with Head head, Index index
+    if cache contains key
+        return value of key in cache
+    end if
+    
+    variable count is 0
+    if index is at least 7
+        add 1 to count
+    end if
+    if rules contains head
+        repeat with rule in the Set of the value of head in rules
+            count_names rule from index + 1
+            add it to count
+        end repeat
+    end if
+    change value of key in cache to count
+    return count
+end function
+
+split item 1 of input on ","
+filter it where the result of is_legal it with rules
+sort it by the length of it
+constant names is empty list of string
+variable total is 0
+repeat with name in it
+    variable ok is true
+    repeat with existing in names
+        starts_with name with existing
+        if it
+            change ok to false
+            exit repeat
+        end if
+    end repeat
+    if ok
+        append name to names
+        count_names character end of name from length of name
+        add it to total
+    end if
+end repeat
+
+say "ANSWER:", total
