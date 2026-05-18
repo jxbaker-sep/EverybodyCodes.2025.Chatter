@@ -1,0 +1,73 @@
+# Quest 8 — Part 2a
+#
+# Run with:
+#     ./run.py 8 2a --example     # against part2.example.txt
+#     ./run.py 8 2a               # against part2.txt
+#
+# Print the final answer using:
+#     say "ANSWER:", value
+# Anything else printed via `say` is ignored by run.py (treated as debug).
+
+use max, sign, abs from "std:math"
+use wrap from "std:list"
+use integers from "std:parser"
+use get_input from "../util/io"
+constant input is the result of get_input
+
+integers item 1 of input
+constant ns is it
+
+max ns
+constant nails is it
+
+struct Line
+    number First
+    number Second
+end struct
+
+function make_line takes number n1 to number n2 returns Line is
+    if n1 is less than n2
+        return make Line with First n1, Second n2
+    else
+        return make Line with First n2, Second n1
+    end if
+end function
+
+function generate_cutters takes
+    Line line
+    returns list of Line
+is
+    constant output is empty list of Line
+    repeat with i from 1 to Second of line - First of line - 1
+        repeat with j from 1 to nails + First of line - Second of line - 1
+            constant x1 is First of line + i
+            wrap Second of line + j in nails
+            constant x2 is it
+            make_line x1 to x2
+            append it to output
+        end repeat
+    end repeat
+    return output
+end function
+
+variable total is 0
+constant cutters is empty dictionary from Line to number
+repeat with i from 1 to length of ns - 1
+    constant n1 is item i of ns
+    constant n2 is item i + 1 of ns
+    constant line is the result of make_line n1 to n2
+    if cutters contains line
+        add value of line in cutters to total
+    end if
+    generate_cutters line 
+    # say n1, n2, it
+    repeat with cutter in it
+        variable temp is 0
+        if cutters contains cutter
+            change temp to value of cutter in cutters
+        end if
+        change value of cutter in cutters to temp + 1
+    end repeat
+end repeat
+
+say "ANSWER:", total

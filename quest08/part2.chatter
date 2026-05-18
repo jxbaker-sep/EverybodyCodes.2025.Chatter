@@ -51,7 +51,6 @@ end function
 
 integers item 1 of input
 constant ns is it
-max ns
 variable total is 0
 repeat with i from 1 to length of ns - 1
     constant n1 is item i of ns
