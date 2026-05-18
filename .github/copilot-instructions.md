@@ -38,6 +38,13 @@ saves them as `part<N>.example.1.txt`, `part<N>.example.2.txt`, …, each
 with a matching `.expected` file. Single-example quests stay on the
 unsuffixed `part<N>.example.txt` / `.expected`.
 
+Alternate implementations of the same part live in
+`part<N><letter>.chatter` (e.g. `part2a.chatter`). They reuse the base
+part's `part<N>.txt`, `part<N>.expected`, `part<N>.example*.txt`, and
+`.example*.expected`. Run with `./run.py <quest> 2a`. A `.slow` marker
+follows the variant suffix (`part<N><letter>.slow`) so you can skip
+just the experimental one.
+
 The Chatter script reads its input path from `argv[0]`:
 
 ```chatter

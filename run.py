@@ -104,7 +104,11 @@ def copy_to_clipboard(text: str) -> str | None:
 def main() -> int:
     ap = argparse.ArgumentParser(description="Run and verify a quest part.")
     ap.add_argument("quest", type=int, help="Quest number (1-20)")
-    ap.add_argument("part", type=int, choices=(1, 2, 3), help="Part number")
+    ap.add_argument("part", type=str,
+                    help="Part: 1, 2, or 3 — optionally followed by a single "
+                         "lowercase letter (e.g. '2a') to select an "
+                         "alternate-implementation script that reuses part 2's "
+                         "input and expected files.")
     ap.add_argument("--example", nargs="?", const=0, default=None, type=int,
                     metavar="N",
                     help="Use the example input. Bare --example uses "
@@ -124,12 +128,21 @@ def main() -> int:
                          "the solution. By default such parts are skipped.")
     args = ap.parse_args()
 
+    part_match = re.fullmatch(r"([1-3])([a-z]?)", args.part)
+    if not part_match:
+        print(f"error: invalid part {args.part!r}; expected 1, 2, 3, or a "
+              f"digit followed by one lowercase letter (e.g. 2a)",
+              file=sys.stderr)
+        return 2
+    part_num = int(part_match.group(1))     # used for input/expected paths
+    part_id = args.part                     # used for script and .slow marker
+
     qdir = REPO_ROOT / f"quest{args.quest:02d}"
-    script = qdir / f"part{args.part}.chatter"
-    slow_marker = qdir / f"part{args.part}.slow"
+    script = qdir / f"part{part_id}.chatter"
+    slow_marker = qdir / f"part{part_id}.slow"
     if slow_marker.is_file() and not args.force_slow:
         note = slow_marker.read_text(encoding="utf-8").strip()
-        print(f"⏭  skipping quest{args.quest:02d}/part{args.part}: marked SLOW",
+        print(f"⏭  skipping quest{args.quest:02d}/part{part_id}: marked SLOW",
               file=sys.stderr)
         if note:
             print(f"   ({note})", file=sys.stderr)
@@ -137,14 +150,14 @@ def main() -> int:
         return 0
     if args.example is not None:
         if args.example == 0:
-            input_path = qdir / f"part{args.part}.example.txt"
-            expected_path = qdir / f"part{args.part}.example.expected"
+            input_path = qdir / f"part{part_num}.example.txt"
+            expected_path = qdir / f"part{part_num}.example.expected"
         else:
-            input_path = qdir / f"part{args.part}.example.{args.example}.txt"
-            expected_path = qdir / f"part{args.part}.example.{args.example}.expected"
+            input_path = qdir / f"part{part_num}.example.{args.example}.txt"
+            expected_path = qdir / f"part{part_num}.example.{args.example}.expected"
     else:
-        input_path = qdir / f"part{args.part}.txt"
-        expected_path = qdir / f"part{args.part}.expected"
+        input_path = qdir / f"part{part_num}.txt"
+        expected_path = qdir / f"part{part_num}.expected"
     if args.expected:
         expected_path = Path(args.expected)
 
