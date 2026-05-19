@@ -35,7 +35,7 @@ function increment_knight takes string knight by number increment is
     else if knight is "C"
         add increment to item 3 of knights
     else
-        expect false, "Unknown knight " & knight
+        fail "Unknown knight " & knight
     end if
 end function
 
@@ -47,7 +47,7 @@ function get_mentors takes string novice returns number is
     else if novice is "c"
         return item 3 of knights
     end if
-    expect false, "Unknown novice " & novice
+    fail "Unknown novice " & novice
     return 0
 end function
 
