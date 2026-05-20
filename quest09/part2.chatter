@@ -8,8 +8,130 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+use split from "std:string"
+use range, wrap, uniquify from "std:list"
 use get_input from "../util/io"
-constant input is the result of get_input
 
-# TODO: solve quest 9 part 2
-say "ANSWER:", "TODO"
+function parse_line takes string line returns string is
+    split line on ":"
+    return item 2 of it
+end function
+
+get_input
+map it using the result of parse_line it
+constant dragons is it
+
+type StringToNumber is dictionary from string to number
+
+struct Node
+    StringToNumber NextNodes
+    number Leaf # 0 if not leaf, otherwise value of dna 
+end struct
+
+function make_node returns Node is
+    return make Node with NextNodes empty StringToNumber, Leaf 0
+end function
+
+constant nodes is empty list of Node
+constant head is the result of make_node
+
+repeat with current_dragon_index from 1 to length of dragons
+    constant dragon is item current_dragon_index of dragons
+    variable current is head
+    repeat with i from 1 to length of dragon
+        constant c is character i of dragon
+        constant d is NextNodes of current
+        if not d contains c
+            variable leaf is 0
+            if i is the length of dragon
+                change leaf to current_dragon_index
+            end if 
+            make_node
+            append it with Leaf leaf to nodes
+            change value of c in d to length of nodes
+        else if i is the length of dragon
+            fail "Duplicate DNA sequence"
+        end if
+        constant indirection is value of c in d
+        change current to item indirection of nodes
+    end repeat
+end repeat
+
+function find_children takes number parent1_index with number parent2_index returns list of number is
+    constant parent1 is item parent1_index of dragons
+    constant parent2 is item parent2_index of dragons
+    
+    variable open_nodes is empty list of Node
+    append head to open_nodes
+    
+    repeat with i from 1 to length of parent1
+        constant c1 is character i of parent1
+        constant c2 is character i of parent2
+        if c1 is c2
+            constant temp is empty list of Node
+            repeat with node in open_nodes
+                if NextNodes of node contains c1
+                    constant nexter is value of c1 in NextNodes of node
+                    append item nexter of nodes to temp
+                end if
+            end repeat
+            change open_nodes to temp
+        else
+            constant temp is empty list of Node
+            repeat with node in open_nodes
+                if NextNodes of node contains c1
+                    constant nexter is value of c1 in NextNodes of node
+                    append item nexter of nodes to temp
+                end if
+                if NextNodes of node contains c2
+                    constant nexter is value of c2 in NextNodes of node
+                    append item nexter of nodes to temp
+                end if
+            end repeat
+            change open_nodes to temp
+        end if
+        if open_nodes is empty
+            return empty list of number
+        end if
+    end repeat
+    map open_nodes using Leaf of it
+    filter it where it is not parent1_index and it is not parent2_index
+    return it
+end function
+
+function compute_similarity takes string child with string parent returns number is
+    range 1 to length of child
+    filter it where character it of child is character it of parent
+    return length of it
+end function
+
+constant found is empty unique list of number
+variable total is 0
+repeat with i from 1 to length of dragons - 1
+    repeat with j from i + 1 to length of dragons
+        if found contains i
+            exit repeat
+        end if
+        if found contains j
+            next repeat
+        end if
+        find_children i with j
+        if it is empty
+            next repeat
+        end if
+        add i to found
+        add j to found
+        repeat with child in it
+            add child to found
+            compute_similarity item child of dragons with item i of dragons
+            variable similarity is it
+            compute_similarity item child of dragons with item j of dragons
+            multiply similarity by it
+            add similarity to total
+        end repeat
+    end repeat
+end repeat
+
+# say nodes
+
+say "ANSWER:", total
