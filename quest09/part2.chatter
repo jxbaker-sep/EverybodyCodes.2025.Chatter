@@ -9,7 +9,7 @@
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
 use split from "std:string"
-use range, wrap, uniquify from "std:list"
+use range, uniquify from "std:list"
 use get_input from "../util/io"
 
 function parse_line takes string line returns string is
@@ -21,11 +21,16 @@ get_input
 map it using the result of parse_line it
 constant dragons is it
 
+# Sanity check: input must all be equal-length
+map dragons using length of it
+uniquify it
+expect length of it to be 1, "Algorithm does not work for non-equal lengths of DNA"
+
 type StringToNumber is dictionary from string to number
 
 struct Node
     StringToNumber NextNodes
-    number Leaf # 0 if not leaf, otherwise value of dna 
+    number Leaf # 0 if not leaf, otherwise index of dna 
 end struct
 
 function make_node returns Node is
@@ -67,29 +72,20 @@ function find_children takes number parent1_index with number parent2_index retu
     repeat with i from 1 to length of parent1
         constant c1 is character i of parent1
         constant c2 is character i of parent2
-        if c1 is c2
-            constant temp is empty list of Node
-            repeat with node in open_nodes
-                if NextNodes of node contains c1
-                    constant nexter is value of c1 in NextNodes of node
-                    append item nexter of nodes to temp
-                end if
-            end repeat
-            change open_nodes to temp
-        else
-            constant temp is empty list of Node
-            repeat with node in open_nodes
-                if NextNodes of node contains c1
-                    constant nexter is value of c1 in NextNodes of node
-                    append item nexter of nodes to temp
-                end if
-                if NextNodes of node contains c2
-                    constant nexter is value of c2 in NextNodes of node
-                    append item nexter of nodes to temp
-                end if
-            end repeat
-            change open_nodes to temp
-        end if
+        constant temp is empty list of Node
+        repeat with node in open_nodes
+            if NextNodes of node contains c1
+                constant child_index is value of c1 in NextNodes of node
+                append item child_index of nodes to temp
+            end if
+        
+            if c1 is not c2 and NextNodes of node contains c2
+                constant child_index is value of c2 in NextNodes of node
+                append item child_index of nodes to temp
+            end if
+        end repeat
+        change open_nodes to temp
+
         if open_nodes is empty
             return empty list of number
         end if
