@@ -29,12 +29,12 @@ expect length of it to be 1, "Algorithm does not work for non-equal lengths of D
 type StringToNumber is dictionary from string to number
 
 struct Node
-    StringToNumber NextNodes
+    StringToNumber Children
     number Leaf # 0 if not leaf, otherwise index of dna 
 end struct
 
 function make_node returns Node is
-    return make Node with NextNodes empty StringToNumber, Leaf 0
+    return make Node with Children empty StringToNumber, Leaf 0
 end function
 
 constant nodes is empty list of Node
@@ -45,7 +45,7 @@ repeat with current_dragon_index from 1 to length of dragons
     variable current is head
     repeat with i from 1 to length of dragon
         constant c is character i of dragon
-        constant d is NextNodes of current
+        constant d is Children of current
         if not d contains c
             variable leaf is 0
             if i is the length of dragon
@@ -73,13 +73,13 @@ function find_children takes number parent1_index with number parent2_index retu
         constant c2 is character i of parent2
         constant temp is empty list of Node
         repeat with node in open_nodes
-            if NextNodes of node contains c1
-                constant child_index is value of c1 in NextNodes of node
+            if Children of node contains c1
+                constant child_index is value of c1 in Children of node
                 append item child_index of nodes to temp
             end if
         
-            if c1 is not c2 and NextNodes of node contains c2
-                constant child_index is value of c2 in NextNodes of node
+            if c1 is not c2 and Children of node contains c2
+                constant child_index is value of c2 in Children of node
                 append item child_index of nodes to temp
             end if
         end repeat
