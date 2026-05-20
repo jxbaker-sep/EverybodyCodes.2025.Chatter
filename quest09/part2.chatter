@@ -66,8 +66,7 @@ function find_children takes number parent1_index with number parent2_index retu
     constant parent1 is item parent1_index of dragons
     constant parent2 is item parent2_index of dragons
     
-    variable open_nodes is empty list of Node
-    append head to open_nodes
+    variable open_nodes is list of head
     
     repeat with i from 1 to length of parent1
         constant c1 is character i of parent1
