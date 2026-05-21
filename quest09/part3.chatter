@@ -118,7 +118,7 @@ repeat with i from 1 to length of dragons - 1
     end repeat
 end repeat
 
-# resolve all parents and counts
+# resolve all parents, count family sizes and sum of "scale numbers"
 constant set_counts is empty dictionary from number to number
 constant set_sums is empty dictionary from number to number
 repeat with i from 1 to length of dragon_to_set

@@ -14,7 +14,7 @@ end function
 export function find_root takes number set1 returns number is
     constant parent is item set1 of nodes
     if parent is set1
-        return set1
+        return parent
     end if
     find_root parent
     change item set1 of nodes to it
