@@ -1,0 +1,39 @@
+# We just record sets as numbers; the numbers
+# index into this list; the result is the parent node
+# Therefore, nodes start equal to their own index.
+# Technically this could be a memory leak, but that's
+# not relevant to my use case here.
+constant nodes is empty list of number
+
+export function make_set returns number is
+    constant n is length of nodes + 1
+    append n to nodes
+    return n
+end function
+
+export function find_root takes number set1 returns number is
+    constant parent is item set1 of nodes
+    if parent is set1
+        return set1
+    end if
+    find_root parent
+    change item set1 of nodes to it
+    return it 
+end function
+
+export function union_sets takes
+    number set1
+    with number set2
+    returns number
+is
+    if set1 is set2
+        return set1
+    end if
+    find_root set1
+    constant root1 is it
+    find_root set2
+    constant root2 is it
+    # Technically I'm supposed to balance the tree but I can't be bothered
+    change item root1 of nodes to root2
+    return root2
+end function

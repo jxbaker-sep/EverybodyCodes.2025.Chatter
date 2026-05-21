@@ -8,8 +8,141 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
+use value_or from "std:dictionary"
+use make_set, find_root, union_sets from "../util/disjointset"
+use split from "std:string"
+use range, uniquify from "std:list"
 use get_input from "../util/io"
-constant input is the result of get_input
 
-# TODO: solve quest 9 part 3
-say "ANSWER:", "TODO"
+function parse_line takes string line returns string is
+    split line on ":"
+    return item 2 of it
+end function
+
+get_input
+map it using the result of parse_line it
+constant dragons is it
+
+# Sanity check: input must all be equal-length
+map dragons using length of it
+uniquify it
+expect length of it to be 1, "Algorithm does not work for non-equal lengths of DNA"
+
+type StringToNumber is dictionary from string to number
+
+struct Node
+    StringToNumber Children
+    number Leaf # 0 if not leaf, otherwise index of dna 
+end struct
+
+function make_node returns Node is
+    return make Node with Children empty StringToNumber, Leaf 0
+end function
+
+constant nodes is empty list of Node
+constant head is the result of make_node
+
+# create the trie
+repeat with current_dragon_index from 1 to length of dragons
+    constant dragon is item current_dragon_index of dragons
+    variable current is head
+    repeat with i from 1 to length of dragon
+        constant c is character i of dragon
+        constant d is Children of current
+        if not d contains c
+            variable leaf is 0
+            if i is the length of dragon
+                change leaf to current_dragon_index
+            end if 
+            make_node
+            append it with Leaf leaf to nodes
+            change value of c in d to length of nodes
+        else if i is the length of dragon
+            fail "Duplicate DNA sequence"
+        end if
+        constant indirection is value of c in d
+        change current to item indirection of nodes
+    end repeat
+end repeat
+
+function find_children takes number parent1_index with number parent2_index returns list of number is
+    constant parent1 is item parent1_index of dragons
+    constant parent2 is item parent2_index of dragons
+    
+    variable open_nodes is list of head
+    
+    repeat with i from 1 to length of parent1
+        constant c1 is character i of parent1
+        constant c2 is character i of parent2
+        constant temp is empty list of Node
+        repeat with node in open_nodes
+            if Children of node contains c1
+                constant child_index is value of c1 in Children of node
+                append item child_index of nodes to temp
+            end if
+        
+            if c1 is not c2 and Children of node contains c2
+                constant child_index is value of c2 in Children of node
+                append item child_index of nodes to temp
+            end if
+        end repeat
+        change open_nodes to temp
+
+        if open_nodes is empty
+            return empty list of number
+        end if
+    end repeat
+    map open_nodes using Leaf of it
+    filter it where it is not parent1_index and it is not parent2_index
+    return it
+end function
+
+constant dragon_to_set is empty list of number
+repeat with i from 1 to length of dragons
+    make_set
+    append it to dragon_to_set
+end repeat
+
+# constant found is empty unique list of number
+repeat with i from 1 to length of dragons - 1
+    repeat with j from i + 1 to length of dragons
+        find_children i with j
+        constant children is it
+        if children is empty
+            next repeat
+        end if
+        union_sets item i of dragon_to_set with item j of dragon_to_set
+        repeat with child in children
+            union_sets item i of dragon_to_set with item child of dragon_to_set
+        end repeat
+    end repeat
+end repeat
+
+# resolve all parents and counts
+constant set_counts is empty dictionary from number to number
+constant set_sums is empty dictionary from number to number
+repeat with i from 1 to length of dragon_to_set
+    find_root item i of dragon_to_set
+    constant root is it
+    change item i of dragon_to_set to root
+    value_or root in set_counts with 0
+    change value of root in set_counts to it + 1
+    value_or root in set_sums with 0
+    change value of root in set_sums to it + i
+end repeat
+
+say set_counts
+say set_sums
+
+variable needle is 0
+repeat with key in keys of set_counts
+    if needle is 0
+        change needle to key
+        next repeat
+    end if
+    if value of key in set_counts is greater than value of needle in set_counts
+        change needle to key
+    end if
+end repeat
+
+say "ANSWER:", value of needle in set_sums
