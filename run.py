@@ -150,6 +150,23 @@ def main() -> int:
         return 0
     if args.example is not None:
         if args.example == 0:
+            numbered = sorted(qdir.glob(f"part{part_num}.example.[0-9]*.txt"))
+            numbered_re = re.compile(
+                rf"^part{part_num}\.example\.(\d+)\.txt$"
+            )
+            numbered = [p for p in numbered if numbered_re.match(p.name)]
+            if numbered:
+                indices = sorted(
+                    int(numbered_re.match(p.name).group(1)) for p in numbered
+                )
+                idx_list = ", ".join(f"--example {i}" for i in indices)
+                print(
+                    f"quest{args.quest:02d}/part{part_num} has "
+                    f"{len(indices)} worked examples; re-run with one of: "
+                    f"{idx_list}",
+                    file=sys.stderr,
+                )
+                return 2
             input_path = qdir / f"part{part_num}.example.txt"
             expected_path = qdir / f"part{part_num}.example.expected"
         else:
