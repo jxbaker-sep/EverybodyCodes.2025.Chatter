@@ -8,8 +8,90 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
-use get_input from "../util/io"
-constant input is the result of get_input
+use abs from "std:math"
+use make_queue_with, dequeue, enqueue, size_of from "std:queue"
+use parse from "std:string"
+use Point from "../util/point"
+use get_input, get_extra_input from "../util/io"
+constant grid is the result of get_input
 
-# TODO: solve quest 10 part 1
-say "ANSWER:", "TODO"
+get_extra_input
+constant max_moves is the result of parse item 1 of it
+
+function get takes Point p returns string is
+    constant line is item (Y of p) of grid
+    return character (X of p) of line
+end function
+
+function find_starting_location returns Point is
+    repeat with y from 1 to length of grid
+        repeat with x from 1 to length of item y of grid
+            if character x of item y of grid is "D"
+                return make Point with X x, Y y
+            end if
+        end repeat
+    end repeat
+    fail "Could not find D in grid."
+end function
+
+constant starting_location is the result of find_starting_location
+
+
+struct Node
+    number Turn
+    Point P
+end struct
+
+make_queue_with make Node with Turn 0, P starting_location
+constant open is it
+constant closed is unique list of starting_location
+
+repeat while true 
+    size_of open
+    if it is 0
+        exit repeat
+    end if
+
+    dequeue open
+    constant current_turn is Turn of it
+    constant current is P of it
+
+    if current_turn is at least max_moves
+        next repeat
+    end if
+    
+    neighbors current
+    repeat with neighbor in it
+        if X of neighbor is at least 1
+            and Y of neighbor is at least 1
+            and Y of neighbor is at most the length of grid  
+            and X of neighbor is at most the length of item 1 of grid
+            and not closed contains neighbor
+                add neighbor to closed
+                enqueue open with make Node with P neighbor, Turn current_turn + 1
+        end if
+    end repeat
+end repeat
+
+function neighbors takes
+    Point p
+    returns list of Point
+is
+    constant output is empty list of Point
+    repeat with dx in list of -2, -1, 1, 2
+        repeat with dy in list of -2, -1, 1, 2
+            abs dx
+            constant temp is it
+            abs dy
+            if it is not temp
+                append make Point with X (X of p + dx), Y (Y of p + dy) to output
+            end if
+        end repeat
+    end repeat
+
+    return output
+end function
+
+filter closed where character (X of it) of item (Y of it) of grid is "S"
+
+say "ANSWER:", length of it
