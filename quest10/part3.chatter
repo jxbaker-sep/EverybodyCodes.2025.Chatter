@@ -8,8 +8,142 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
-use get_input from "../util/io"
+use enlist, clone_unique_list from "std:list"
+use abs, sum from "std:math"
+use make_queue_with, dequeue, enqueue, size_of from "std:queue"
+use parse from "std:string"
+use Point from "../util/point"
+use get_input, get_extra_input from "../util/io"
 constant input is the result of get_input
 
-# TODO: solve quest 10 part 3
-say "ANSWER:", "TODO"
+function find_all takes 
+    string needle
+    returns unique list of Point
+is
+    constant output is empty unique list of Point
+    repeat with y from 1 to length of input
+        repeat with x from 1 to length of item y of input
+            if character x of item y of input is needle
+                add make Point with X x, Y y to output
+            end if
+        end repeat
+    end repeat
+    return output
+end function
+
+find_all "D"
+enlist it
+constant starting_dragon is item 1 of it
+constant starting_sheep is empty list of number
+repeat with i from 1 to length of item 1 of input
+    if character i of item 1 of input is "S" 
+        append 1 to starting_sheep
+    else
+        append 0 to starting_sheep
+    end if
+end repeat
+find_all "#"
+constant hedges is it
+
+constant cache is empty dictionary from string to number
+
+function count_unique_moves takes
+    Point dragon
+    with list of number sheep
+    with number count_of_sheep
+    with string whose_move # "D" or "S"
+    returns number
+is
+    if count_of_sheep is 0
+        return 1
+    end if
+    constant key is dragon & "," & sheep & whose_move
+    if cache contains key
+        return value of key in cache
+    end if
+    variable total is 0
+    if whose_move is "S"
+        variable some_sheep_moved is false
+        variable all_sheep_escaped is true
+        repeat with sheep_x from 1 to length of sheep
+            if item sheep_x of sheep is 0
+                next repeat
+            end if
+            constant sheep_y is item sheep_x of sheep + 1
+
+            # A sheep has escaped. Next repeat because there might be an
+            # alternate way to catch this sheep before it escapes
+            if sheep_y is greater than the length of input
+                change some_sheep_moved to true
+                next repeat
+            end if
+
+            change all_sheep_escaped to false
+            # Sheep will not move onto dragon unless also contains a hedge
+            constant next_sheep is make Point with Y sheep_y, X sheep_x
+            if next_sheep is dragon and not hedges contains next_sheep
+                next repeat
+            end if
+
+            change some_sheep_moved to true
+            constant next_sheeps is items 1 to end of sheep
+            change item sheep_x of next_sheeps to sheep_y
+            count_unique_moves dragon with next_sheeps with count_of_sheep with "D"
+            add it to total
+        end repeat
+
+        if all_sheep_escaped
+            return 0
+        end if
+
+        if not some_sheep_moved
+            count_unique_moves dragon with sheep with count_of_sheep with "D"
+            add it to total
+        end if
+    else
+        neighbors dragon
+        repeat with neighbor in it
+            variable next_sheeps is sheep
+            variable xxx is count_of_sheep
+            if item (X of neighbor) of sheep is Y of neighbor and not hedges contains neighbor
+                change next_sheeps to items 1 to end of next_sheeps
+                change item (X of neighbor) of next_sheeps to 0
+                subtract 1 from xxx
+            end if
+            count_unique_moves neighbor with next_sheeps with xxx with "S"
+            add it to total
+        end repeat
+    end if
+    change value of key in cache to total
+    return total
+end function
+
+function neighbors takes
+    Point p
+    returns list of Point
+is
+    constant output is empty list of Point
+    repeat with dx in list of -2, -1, 1, 2
+        repeat with dy in list of -2, -1, 1, 2
+            abs dx
+            constant temp is it
+            abs dy
+            if it is not temp
+                if X of p + dx is at least 1
+                    and X of p + dx is at most length of item 1 of input
+                    and Y of p + dy is at least 1
+                    and Y of p + dy is at most the length of input
+                        append make Point with X (X of p + dx), Y (Y of p + dy) to output
+                end if
+            end if
+        end repeat
+    end repeat
+
+    return output
+end function
+
+sum starting_sheep
+count_unique_moves starting_dragon with starting_sheep with it with "S"
+
+say "ANSWER:", it
+
