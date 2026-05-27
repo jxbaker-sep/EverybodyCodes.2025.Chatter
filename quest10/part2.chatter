@@ -8,8 +8,99 @@
 #     say "ANSWER:", value
 # Anything else printed via `say` is ignored by run.py (treated as debug).
 
-use get_input from "../util/io"
-constant input is the result of get_input
+use abs from "std:math"
+use make_queue_with, dequeue, enqueue, size_of from "std:queue"
+use parse from "std:string"
+use Point from "../util/point"
+use get_input, get_extra_input from "../util/io"
+constant grid is the result of get_input
 
-# TODO: solve quest 10 part 2
-say "ANSWER:", "TODO"
+get_extra_input
+constant max_moves is the result of parse item 1 of it
+
+function find_starting_location returns Point is
+    repeat with y from 1 to length of grid
+        repeat with x from 1 to length of item y of grid
+            if character x of item y of grid is "D"
+                return make Point with X x, Y y
+            end if
+        end repeat
+    end repeat
+    fail "Could not find D in grid."
+end function
+
+constant starting_location is the result of find_starting_location
+
+
+struct Node
+    number Turn
+    Point P
+end struct
+
+constant first_node is make Node with Turn 0, P starting_location
+
+make_queue_with first_node
+constant open is it
+constant closed is unique list of first_node
+constant all_removed is empty unique list of Point
+
+repeat while true 
+    size_of open
+    if it is 0
+        exit repeat
+    end if
+
+    dequeue open
+    constant current_turn is Turn of it
+    constant current is P of it
+
+    if current_turn is at least max_moves
+        next repeat
+    end if
+    
+    neighbors current
+    repeat with neighbor in it
+        constant next_node is make Node with P neighbor, Turn current_turn + 1
+        if X of neighbor is at least 1
+            and Y of neighbor is at least 1
+            and Y of neighbor is at most the length of grid  
+            and X of neighbor is at most the length of item 1 of grid
+            and not closed contains next_node
+            # TODO: add filter for "more than 2 above falling sheep"
+                add next_node to closed
+                enqueue open with next_node
+                # Remove sheep we landed on or sheep above us
+                constant sheep1 is make Point with X (X of neighbor), Y (Y of neighbor - current_turn)
+                constant sheep2 is make Point with X (X of neighbor), Y (Y of neighbor - current_turn - 1)
+                if character (X of neighbor) of item (Y of neighbor) of grid is not "#"
+                    add sheep1 to all_removed
+                    add sheep2 to all_removed
+                end if
+        end if
+    end repeat
+end repeat
+
+function neighbors takes
+    Point p
+    returns list of Point
+is
+    constant output is empty list of Point
+    repeat with dx in list of -2, -1, 1, 2
+        repeat with dy in list of -2, -1, 1, 2
+            abs dx
+            constant temp is it
+            abs dy
+            if it is not temp
+                append make Point with X (X of p + dx), Y (Y of p + dy) to output
+            end if
+        end repeat
+    end repeat
+
+    return output
+end function
+
+filter all_removed where Y of it is at least 1
+    and character (X of it) of item (Y of it) of grid is "S"
+
+
+say "ANSWER:", length of it
